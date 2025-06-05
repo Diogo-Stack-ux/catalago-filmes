@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálago de filmes e Séries</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🎬 Catálogo de Filmes e Séries</h1>
+    </header>
+
+    <main>
+        <!--formularios-->
+        <section class="form-section">
+            <h2>Adicionar Filmes</h2>
+            <form id="form-filme">
+                <input type="text" id="nome" placeholder="nome" required>
+                <input type="text" id="descricao" placeholder="descricao" required>
+                <input type="text" id="genero" placeholder="genero" required>
+                <input type="number" id="ano" placeholder="ano" required>
+                <input type="number" stop="0.1" id="nota" placeholder="nota (0 a 10)"required>
+                <button type="submit">Salvar</button>
+            </form>
+        </section>
+
+         <!-- Filtros -->
+          <section class="list-section">
+            <h2>lista de filmes</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Descrição</th>
+                        <th>Gênero</th>
+                        <th>Ano</th>
+                        <th>Nota</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-filme">
+                     <!-- Os filmes aparecem aqui -->
+                </tbody>
+            </table>
+          </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
