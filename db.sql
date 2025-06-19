@@ -1,5 +1,5 @@
 -- public.filmes definição
-
+CREATE DATABASE catalago;
 -- Drop table
 
 -- DROP TABLE public.filmes;

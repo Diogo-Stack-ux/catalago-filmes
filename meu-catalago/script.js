@@ -1,36 +1,63 @@
-const apiUrl = 'http://localhost:3000/api/filmes';
-
-const form = document.getElementById('form-filme');
-const tabela = document.getElementById('tabela-filmes');
-
+const API_URL = 'http://localhost:3000/api/filmes';
 let editandoId = null;
 
-// Carregar filmes na tabela
 async function carregarFilmes() {
-    const resposta = await fetch(apiUrl);
-    const filmes = await resposta.json();
+    try {
+        const resposta = await fetch(API_URL);
+        const filmes = await resposta.json();
 
-    tabela.innerHTML = '';
+        // Verifica se é realmente um array
+        if (!Array.isArray(filmes)) {
+            throw new Error('Resposta inesperada da API');
+        }
 
-    filmes.forEach(filme => {
-        const tr = document.createElement('tr');
+        const tabela = document.getElementById('tabela-filmes');
+        tabela.innerHTML = '';
 
-        tr.innerHTML = `
-            <td>${filme.nome}</td>
-            <td>${filme.descricao}</td>
-            <td>${filme.genero}</td>
-            <td>${filme.ano}</td>
-            <td>${filme.nota}</td>
-            <td>
-                <button onclick="editarFilme(${filme.id}, '${filme.nome}', '${filme.descricao}', '${filme.genero}', ${filme.ano}, ${filme.nota})">Editar</button>
-                <button onclick="removerFilme(${filme.id})">Excluir</button>
-            </td>
-        `;
-        tabela.appendChild(tr);
-    });
+        filmes.forEach(filme => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${filme.nome}</td>
+                <td>${filme.descricao}</td>
+                <td>${filme.genero}</td>
+                <td>${filme.ano}</td>
+                <td>${filme.nota}</td>
+                <td>
+                    <button onclick="editarFilme(${filme.id})">✏️</button>
+                    <button onclick="excluirFilme(${filme.id})">🗑️</button>
+                </td>
+            `;
+            tabela.appendChild(tr);
+        });
+    } catch (erro) {
+        console.error('Erro ao carregar filmes:', erro);
+    }
 }
 
-form.addEventListener('submit', async (e) => {
+async function excluirFilme(id) {
+    if (confirm('Tem certeza que deseja excluir este filme?')) {
+        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        carregarFilmes();
+    }
+}
+
+function editarFilme(id) {
+    fetch(API_URL)
+        .then(res => res.json())
+        .then(filmes => {
+            const filme = filmes.find(f => f.id === id);
+            if (filme) {
+                document.getElementById('nome').value = filme.nome;
+                document.getElementById('descricao').value = filme.descricao;
+                document.getElementById('genero').value = filme.genero;
+                document.getElementById('ano').value = filme.ano;
+                document.getElementById('nota').value = filme.nota;
+                editandoId = filme.id;
+            }
+        });
+}
+
+document.getElementById('form-filme').addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const filme = {
@@ -38,70 +65,26 @@ form.addEventListener('submit', async (e) => {
         descricao: document.getElementById('descricao').value,
         genero: document.getElementById('genero').value,
         ano: parseInt(document.getElementById('ano').value),
-        nota: parseFloat(document.getElementById('nota').value)
+        nota: parseFloat(document.getElementById('nota').value),
     };
 
     if (editandoId) {
-        await fetch(`${apiUrl}/${editandoId}`, {
+        await fetch(`${API_URL}/${editandoId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(filme)
+            body: JSON.stringify(filme),
         });
         editandoId = null;
     } else {
-        await fetch(apiUrl, {
+        await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(filme)
+            body: JSON.stringify(filme),
         });
     }
 
-    form.reset();
+    document.getElementById('form-filme').reset();
     carregarFilmes();
 });
 
-function editarFilme(id, nome, descricao, genero, ano, nota) {
-    document.getElementById('nome').value = nome;
-    document.getElementById('descricao').value = descricao;
-    document.getElementById('genero').value = genero;
-    document.getElementById('ano').value = ano;
-    document.getElementById('nota').value = nota;
-
-    editandoId = id;
-}
-
-async function removerFilme(id) {
-    await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
-    carregarFilmes();
-}
-
-function aplicarFiltros() {
-    const nomeFiltro = document.getElementById('filtro-nome').value.toLowerCase();
-    const generoFiltro = document.getElementById('filtro-genero').value.toLowerCase();
-    const notaFiltro = parseFloat(document.getElementById('filtro-nota').value);
-
-    const linhas = tabela.querySelectorAll('tr');
-    linhas.forEach(linha => {
-        const [nome, , genero, , nota] = linha.querySelectorAll('td');
-        const notaValor = parseFloat(nota.innerText);
-
-        const mostrar =
-            (nome.innerText.toLowerCase().includes(nomeFiltro)) &&
-            (genero.innerText.toLowerCase().includes(generoFiltro)) &&
-            (isNaN(notaFiltro) || notaValor >= notaFiltro);
-
-        linha.style.display = mostrar ? '' : 'none';
-    });
-}
-
-function limparFiltros() {
-    document.getElementById('filtro-nome').value = '';
-    document.getElementById('filtro-genero').value = '';
-    document.getElementById('filtro-nota').value = '';
-
-    const linhas = tabela.querySelectorAll('tr');
-    linhas.forEach(linha => linha.style.display = '');
-}
-
-// Carregar filmes ao abrir a página
 carregarFilmes();
